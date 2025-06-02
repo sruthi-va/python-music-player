@@ -37,7 +37,6 @@ A simple desktop music player app built with **PyQt5** and **pygame**. It lets y
     python main.py
 
 **To-Do**
-- Auto load songs from folder
 - Volume slider
 - Playlist support
 - Shuffle & Repeat
