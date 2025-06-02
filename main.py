@@ -1,6 +1,6 @@
 import sys
 import os
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QFileDialog, QLabel
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QFileDialog, QLabel, QSlider
 from PyQt5.QtCore import QTimer
 import pygame
 
@@ -13,6 +13,7 @@ class MusicPlayer(QWidget):
         self.init_ui()
 
         pygame.mixer.init()
+        pygame.mixer.music.set_volume(0.5)
         self.playlist = self.load_songs_from_folder("songs")
         self.current_index = 0
         self.is_paused = False
@@ -41,6 +42,22 @@ class MusicPlayer(QWidget):
         layout.addWidget(self.btn_next)
 
         self.setLayout(layout)
+
+        self.volume_slider = QSlider()
+        self.volume_slider.setOrientation(1)  # Vertical: 1, Horizontal: 0
+        self.volume_slider.setRange(0, 100)
+        self.volume_slider.setValue(50)  # Default volume: 50%
+        self.volume_slider.valueChanged.connect(self.change_volume)
+        self.volume_slider.setTickPosition(QSlider.TicksBelow)
+        self.volume_slider.setTickInterval(10)
+        self.volume_slider.setSingleStep(1)
+
+        layout.addWidget(QLabel("Volume"))
+        layout.addWidget(self.volume_slider)
+        self.volume_label = QLabel(f"Current Volume: {self.volume_slider.value()}%")
+        layout.addWidget(self.volume_label)
+        self.volume_slider.valueChanged.connect(lambda value: self.volume_label.setText(f"Current Volume: {value}%"))
+
 
     def load_songs_from_folder(self, folder):
         if not os.path.exists(folder):
@@ -83,6 +100,10 @@ class MusicPlayer(QWidget):
     def check_song_finished(self):
         if not pygame.mixer.music.get_busy() and not self.is_paused:
             self.next_song()
+    
+    def change_volume(self, value):
+        volume = value / 100  # pygame expects a value between 0.0 and 1.0
+        pygame.mixer.music.set_volume(volume)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
