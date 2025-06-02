@@ -10,7 +10,8 @@ A simple desktop music player app built with **PyQt5** and **pygame**. It lets y
 - Play / Pause controls
 - File browser to select music
 - Lightweight desktop GUI using PyQt5
-
+- Autoloads all songs in folder and plays consecutively
+- Adjust volume precisely with volume slider and text UI
 ---
 
 ## Tech Stack
@@ -37,7 +38,6 @@ A simple desktop music player app built with **PyQt5** and **pygame**. It lets y
     python main.py
 
 **To-Do**
-- Volume slider
 - Playlist support
 - Shuffle & Repeat
 - Show metadata (title, artist)
