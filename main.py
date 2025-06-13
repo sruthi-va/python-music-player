@@ -2,6 +2,8 @@ import sys
 import os
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QFileDialog, QLabel, QSlider
 from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QListWidget
+
 import pygame
 
 class MusicPlayer(QWidget):
@@ -15,6 +17,7 @@ class MusicPlayer(QWidget):
         pygame.mixer.init()
         pygame.mixer.music.set_volume(0.5)
         self.playlist = self.load_songs_from_folder("songs")
+        self.update_playlist_ui()
         self.current_index = 0
         self.is_paused = False
 
@@ -28,6 +31,12 @@ class MusicPlayer(QWidget):
 
         self.label = QLabel("Ready")
         layout.addWidget(self.label)
+
+        self.song_list_widget = QListWidget()
+        self.song_list_widget.clicked.connect(self.song_selected)
+        layout.addWidget(QLabel("Playlist"))
+        layout.addWidget(self.song_list_widget)
+
 
         self.btn_play = QPushButton("Play")
         self.btn_play.clicked.connect(self.play_music)
@@ -76,6 +85,7 @@ class MusicPlayer(QWidget):
         pygame.mixer.music.play()
         self.is_paused = False
         self.label.setText(f"Now Playing: {os.path.basename(song)}")
+        self.song_list_widget.setCurrentRow(self.current_index)
 
     def pause_music(self):
         if not self.playlist:
@@ -104,6 +114,15 @@ class MusicPlayer(QWidget):
     def change_volume(self, value):
         volume = value / 100  # pygame expects a value between 0.0 and 1.0
         pygame.mixer.music.set_volume(volume)
+
+    def update_playlist_ui(self):
+        self.song_list_widget.clear()
+        for song_path in self.playlist:
+            self.song_list_widget.addItem(os.path.basename(song_path))
+
+    def song_selected(self, index):
+        self.current_index = index.row()
+        self.play_music()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
