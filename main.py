@@ -5,6 +5,7 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QListWidget
 
 import pygame
+import random
 
 class MusicPlayer(QWidget):
     def __init__(self):
@@ -20,6 +21,11 @@ class MusicPlayer(QWidget):
         self.update_playlist_ui()
         self.current_index = 0
         self.is_paused = False
+
+        self.is_shuffle = False
+        self.is_repeat = False
+        self.original_playlist = self.playlist.copy()  # To restore after shuffle
+
 
         self.timer = QTimer()
         self.timer.setInterval(1000)
@@ -49,6 +55,17 @@ class MusicPlayer(QWidget):
         self.btn_next = QPushButton("Next Song")
         self.btn_next.clicked.connect(self.next_song)
         layout.addWidget(self.btn_next)
+
+        self.btn_shuffle = QPushButton("Shuffle: OFF")
+        self.btn_shuffle.setCheckable(True)
+        self.btn_shuffle.clicked.connect(self.toggle_shuffle)
+        layout.addWidget(self.btn_shuffle)
+
+        self.btn_repeat = QPushButton("Repeat: OFF")
+        self.btn_repeat.setCheckable(True)
+        self.btn_repeat.clicked.connect(self.toggle_repeat)
+        layout.addWidget(self.btn_repeat)
+
 
         self.setLayout(layout)
 
@@ -100,16 +117,20 @@ class MusicPlayer(QWidget):
             self.label.setText("Paused")
             self.is_paused = True
 
-
     def next_song(self):
         if not self.playlist:
             return
         self.current_index = (self.current_index + 1) % len(self.playlist)
         self.play_music()
 
+
     def check_song_finished(self):
         if not pygame.mixer.music.get_busy() and not self.is_paused:
-            self.next_song()
+            if self.is_repeat:
+                self.play_music()
+            else:
+                self.next_song()
+
     
     def change_volume(self, value):
         volume = value / 100  # pygame expects a value between 0.0 and 1.0
@@ -123,6 +144,26 @@ class MusicPlayer(QWidget):
     def song_selected(self, index):
         self.current_index = index.row()
         self.play_music()
+
+    def toggle_shuffle(self):
+        self.is_shuffle = not self.is_shuffle
+        if self.is_shuffle:
+            current_song = self.playlist[self.current_index]
+            random.shuffle(self.playlist)
+            self.current_index = self.playlist.index(current_song)
+            self.btn_shuffle.setText("Shuffle: ON")
+        else:
+            current_song = self.playlist[self.current_index]
+            self.playlist = self.original_playlist.copy()
+            self.current_index = self.playlist.index(current_song)
+            self.btn_shuffle.setText("Shuffle: OFF")
+        self.update_playlist_ui()
+        self.song_list_widget.setCurrentRow(self.current_index)
+
+    def toggle_repeat(self):
+        self.is_repeat = not self.is_repeat
+        self.btn_repeat.setText("Repeat: ON" if self.is_repeat else "Repeat: OFF")
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
