@@ -147,18 +147,25 @@ class MusicPlayer(QWidget):
 
     def toggle_shuffle(self):
         self.is_shuffle = not self.is_shuffle
+        current_song = self.playlist[self.current_index]
+
         if self.is_shuffle:
-            current_song = self.playlist[self.current_index]
-            random.shuffle(self.playlist)
-            self.current_index = self.playlist.index(current_song)
+            # Shuffle the rest, keep current song first
+            rest = self.playlist.copy()
+            rest.remove(current_song)
+            random.shuffle(rest)
+            self.playlist = [current_song] + rest
+            self.current_index = 0
             self.btn_shuffle.setText("Shuffle: ON")
         else:
-            current_song = self.playlist[self.current_index]
+            # Restore original order and find current song
             self.playlist = self.original_playlist.copy()
             self.current_index = self.playlist.index(current_song)
             self.btn_shuffle.setText("Shuffle: OFF")
+
         self.update_playlist_ui()
         self.song_list_widget.setCurrentRow(self.current_index)
+
 
     def toggle_repeat(self):
         self.is_repeat = not self.is_repeat
