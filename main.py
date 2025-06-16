@@ -10,6 +10,7 @@ import random
 class MusicPlayer(QWidget):
     def __init__(self):
         super().__init__()
+        self.has_started = False  # To track if first song has started
         self.setWindowTitle("Music Player")
         self.setGeometry(100, 100, 300, 150)
 
@@ -104,6 +105,8 @@ class MusicPlayer(QWidget):
         self.label.setText(f"Now Playing: {os.path.basename(song)}")
         self.song_list_widget.setCurrentRow(self.current_index)
 
+        self.has_started = True
+
     def pause_music(self):
         if not self.playlist:
             return
@@ -123,13 +126,16 @@ class MusicPlayer(QWidget):
         self.current_index = (self.current_index + 1) % len(self.playlist)
         self.play_music()
 
-
     def check_song_finished(self):
+        if not self.has_started:
+            return  # Don’t skip songs if nothing has started yet
+
         if not pygame.mixer.music.get_busy() and not self.is_paused:
             if self.is_repeat:
                 self.play_music()
             else:
                 self.next_song()
+
 
     
     def change_volume(self, value):
